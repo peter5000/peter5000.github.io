@@ -16,7 +16,6 @@
     id('filter-it-btn').addEventListener('click', filterMessage);
     id('upload-btn').addEventListener('click', uploadAndIndexPDF);
     id('query-btn').addEventListener('click', queryIndexedDocuments);
-    // Login/Logout
     id('login-btn').addEventListener('click', loginUser);
     id('logout-btn').addEventListener('click', logoutUser);
     id('increase-permission-btn').addEventListener('click', increasePermission);
