@@ -14,9 +14,14 @@
     id('add-btn').addEventListener('click', addFilterWord);
     id('delete-btn').addEventListener('click', deleteFilterWord);
     id('filter-it-btn').addEventListener('click', filterMessage);
-    // New: Add event listeners for upload and query
     id('upload-btn').addEventListener('click', uploadAndIndexPDF);
     id('query-btn').addEventListener('click', queryIndexedDocuments);
+    // Login/Logout
+    id('login-btn').addEventListener('click', loginUser);
+    id('logout-btn').addEventListener('click', logoutUser);
+    id('increase-permission-btn').addEventListener('click', increasePermission);
+    id('decrease-permission-btn').addEventListener('click', decreasePermission);
+    checkLoginStatus();
   }
 
   /**
@@ -142,6 +147,128 @@
     } catch (err) {
       resultsDiv.textContent = 'Error querying documents.';
     }
+  }
+
+  // Login user
+  async function loginUser() {
+    const username = id('username-input').value.trim();
+    if (!username) return;
+    try {
+      const res = await fetch(`${API_URL}/login/${encodeURIComponent(username)}`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      await statusCheck(res);
+      id('username-input').value = '';
+      await updateUserInfo(1); // Set initial permission level to 1
+      id('current-username').textContent = username;
+      showLoggedInUI();
+    } catch (err) {
+      alert('Login failed');
+    }
+  }
+
+  // Logout user
+  async function logoutUser() {
+    try {
+      const res = await fetch(`${API_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      await statusCheck(res);
+      hideLoggedInUI();
+    } catch (err) {
+      alert('Logout failed');
+    }
+  }
+
+  // Check login status and update UI
+  async function checkLoginStatus() {
+    // Try to get agents; if success, user is logged in
+    try {
+      await updateUserInfo();
+      showLoggedInUI();
+    } catch {
+      hideLoggedInUI();
+    }
+  }
+
+  // Update user info and agent list
+  async function updateUserInfo(permissionLevel) {
+    const agentsRes = await fetch(`${API_URL}/list_agents`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    await statusCheck(agentsRes);
+    const agents = await agentsRes.json();
+    const agentsList = id('agents-list');
+    agentsList.innerHTML = '';
+    agents.forEach(agent => {
+      const li = gen('li');
+      li.textContent = agent;
+      agentsList.appendChild(li);
+    });
+    // Only update permission level, not username
+    if (typeof permissionLevel !== 'undefined') {
+      id('current-permission').textContent = permissionLevel;
+    }
+  }
+
+  // Increase permission
+  async function increasePermission() {
+    try {
+      const res = await fetch(`${API_URL}/increase_permission`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      await statusCheck(res);
+      let current = parseInt(id('current-permission').textContent) || 1;
+      current++;
+      await updateUserInfo(current);
+    } catch (err) {
+      alert('Failed to increase permission');
+    }
+  }
+
+  // Decrease permission
+  async function decreasePermission() {
+    try {
+      const res = await fetch(`${API_URL}/decrease_permission`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      await statusCheck(res);
+      let current = parseInt(id('current-permission').textContent) || 1;
+      current = Math.max(0, current - 1);
+      await updateUserInfo(current);
+    } catch (err) {
+      alert('Failed to decrease permission');
+    }
+  }
+
+  // Show/hide UI helpers
+  function showLoggedInUI() {
+    id('username-input').style.display = 'none';
+    id('login-btn').style.display = 'none';
+    id('logout-btn').style.display = '';
+    id('user-info').style.display = '';
+    id('agents-section').style.display = '';
+  }
+  function hideLoggedInUI() {
+    id('username-input').style.display = '';
+    id('login-btn').style.display = '';
+    id('logout-btn').style.display = 'none';
+    id('user-info').style.display = 'none';
+    id('agents-section').style.display = 'none';
+    id('current-username').textContent = '';
+    id('current-permission').textContent = '';
+    id('agents-list').innerHTML = '';
+  }
+  // Helper to get cookie by name
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
   }
 
   /**
