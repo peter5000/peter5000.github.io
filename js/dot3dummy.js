@@ -10,16 +10,16 @@
    * Initialize eventListners
    */
   function init() {
+    id('login-btn').addEventListener('click', loginUser);
+    id('logout-btn').addEventListener('click', logoutUser);
+    id('increase-permission-btn').addEventListener('click', increasePermission);
+    id('decrease-permission-btn').addEventListener('click', decreasePermission);
     updateFilterList();
     id('add-btn').addEventListener('click', addFilterWord);
     id('delete-btn').addEventListener('click', deleteFilterWord);
     id('filter-it-btn').addEventListener('click', filterMessage);
     id('upload-btn').addEventListener('click', uploadAndIndexPDF);
     id('query-btn').addEventListener('click', queryIndexedDocuments);
-    id('login-btn').addEventListener('click', loginUser);
-    id('logout-btn').addEventListener('click', logoutUser);
-    id('increase-permission-btn').addEventListener('click', increasePermission);
-    id('decrease-permission-btn').addEventListener('click', decreasePermission);
     checkLoginStatus();
   }
 
