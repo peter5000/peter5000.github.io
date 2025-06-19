@@ -14,6 +14,9 @@
     id('add-btn').addEventListener('click', addFilterWord);
     id('delete-btn').addEventListener('click', deleteFilterWord);
     id('filter-it-btn').addEventListener('click', filterMessage);
+    // New: Add event listeners for upload and query
+    id('upload-btn').addEventListener('click', uploadAndIndexPDF);
+    id('query-btn').addEventListener('click', queryIndexedDocuments);
   }
 
   /**
@@ -86,6 +89,58 @@
       id('filtered-result').textContent = data.filtered_message;
     } catch (err) {
       id('filtered-result').textContent = 'Error filtering message';
+    }
+  }
+
+  // Upload and index PDF document
+  async function uploadAndIndexPDF() {
+    const fileInput = id('pdf-file');
+    const status = id('upload-status');
+    if (!fileInput.files.length) {
+      status.textContent = 'Please select a PDF file.';
+      return;
+    }
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    status.textContent = 'Uploading...';
+    try {
+      const res = await fetch(`${API_URL}/index_document`, {
+        method: 'POST',
+        body: formData
+      });
+      await statusCheck(res);
+      const data = await res.json();
+      status.textContent = data.message || 'File indexed successfully!';
+    } catch (err) {
+      status.textContent = 'Error uploading or indexing file.';
+    }
+  }
+
+  // Query indexed documents
+  async function queryIndexedDocuments() {
+    const queryText = id('query-text').value.trim();
+    const resultsDiv = id('query-results');
+    if (!queryText) {
+      resultsDiv.textContent = 'Please enter a query.';
+      return;
+    }
+    resultsDiv.textContent = 'Querying...';
+    try {
+      const res = await fetch(`${API_URL}/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query_text: queryText, top_k: 3 })
+      });
+      await statusCheck(res);
+      const data = await res.json();
+      if (data.query_results && data.query_results.length > 0) {
+        resultsDiv.innerHTML = data.query_results.map(r => `<pre>${r.chunk}</pre><hr>`).join('');
+      } else {
+        resultsDiv.textContent = 'No results found.';
+      }
+    } catch (err) {
+      resultsDiv.textContent = 'Error querying documents.';
     }
   }
 
