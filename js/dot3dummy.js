@@ -10,16 +10,17 @@
    * Initialize eventListners
    */
   function init() {
-    id('login-btn').addEventListener('click', loginUser);
-    id('logout-btn').addEventListener('click', logoutUser);
-    id('increase-permission-btn').addEventListener('click', increasePermission);
-    id('decrease-permission-btn').addEventListener('click', decreasePermission);
     updateFilterList();
     id('add-btn').addEventListener('click', addFilterWord);
     id('delete-btn').addEventListener('click', deleteFilterWord);
     id('filter-it-btn').addEventListener('click', filterMessage);
     id('upload-btn').addEventListener('click', uploadAndIndexPDF);
     id('query-btn').addEventListener('click', queryIndexedDocuments);
+    console.log(id('login-btn'));
+    id('login-btn').addEventListener('click', loginUser);
+    id('logout-btn').addEventListener('click', logoutUser);
+    id('increase-permission-btn').addEventListener('click', increasePermission);
+    id('decrease-permission-btn').addEventListener('click', decreasePermission);
     checkLoginStatus();
   }
 
@@ -159,7 +160,7 @@
       });
       await statusCheck(res);
       id('username-input').value = '';
-      await updateUserInfo(1); // Set initial permission level to 1
+      await updateUserInfo(0); // Set initial permission level to 1
       id('current-username').textContent = username;
       showLoggedInUI();
     } catch (err) {
@@ -221,8 +222,7 @@
         credentials: 'include'
       });
       await statusCheck(res);
-      let current = parseInt(id('current-permission').textContent) || 1;
-      current++;
+      let current = parseInt(res.text) || 0;
       await updateUserInfo(current);
     } catch (err) {
       alert('Failed to increase permission');
@@ -237,8 +237,7 @@
         credentials: 'include'
       });
       await statusCheck(res);
-      let current = parseInt(id('current-permission').textContent) || 1;
-      current = Math.max(0, current - 1);
+      let current = parseInt(res.text) || 0;
       await updateUserInfo(current);
     } catch (err) {
       alert('Failed to decrease permission');
