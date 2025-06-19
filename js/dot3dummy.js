@@ -12,9 +12,7 @@
   function init() {
     updateFilterList();
     id('add-btn').addEventListener('click', addFilterWord);
-    id('add-btn').addEventListener('click', updateFilterList);
     id('delete-btn').addEventListener('click', deleteFilterWord);
-    id('delete-btn').addEventListener('click', updateFilterList);
     id('filter-it-btn').addEventListener('click', filterMessage);
   }
 
